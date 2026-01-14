@@ -1,80 +1,66 @@
-import { IonButton, IonContent, IonHeader, IonInput,IonPage,IonTextarea, IonTitle, IonToolbar } from '@ionic/react';
-import './Tab2.css';
-import { useHistory } from 'react-router';
-import { RepositoryItem } from '../interfaces/RepositoryItem';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonLabel, IonInput, IonTextarea, IonToggle, IonButton, IonLoading, IonText } from '@ionic/react';
+import { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { createRepository } from '../services/GithubService';
 
 const Tab2: React.FC = () => {
-
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [isPrivate, setIsPrivate] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const history = useHistory();
 
-  const repoFormData : RepositoryItem = {
-    name: '',
-    description: '',
-    imageUrl: null,
-    owner: null,
-    language: null,
-  };
-
-  const setRepoName = (value: string) =>{
-    repoFormData.name = value;
-  };
-
-  const setRepoDescription = (value: string) => {
-    repoFormData.description = value;
-  };
-
-  const saveRepository = () => {
-    if(repoFormData.name.trim() === ''){
-      alert("El nombre del repositorio es obligatorio!");
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    if (!name) {
+      setError('El nombre del repositorio es requerido');
       return;
     }
-    createRepository(repoFormData)
-    .then(() => {history.push('/tab1');})
-    .catch(() => {
-      alert('Error al crear el repositorio.');
-    });
-  }
-
+    setLoading(true);
+    try {
+      await createRepository(name, description, isPrivate);
+      history.replace('/tab1');
+    } catch (err) {
+      console.error(err);
+      setError('Error al crear el repositorio');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Formulario de Repositorios</IonTitle>
+          <IonTitle>Crear Repositorio</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent fullscreen>
-        <IonHeader collapse="condense">
-          <IonToolbar>
-            <IonTitle size="large">Formulario de Repositorios</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-            <div className="form-container">
-      <IonInput 
-      label="Nombre del repositorio" 
-      labelPlacement="floating" 
-      fill="outline" 
-      placeholder="android-project" 
-      className='form-field'
-      value={repoFormData.name}
-      onIonChange={(e) => setRepoName(e.detail.value!)}
-      ></IonInput>
-      <IonTextarea 
-      label="Descripcion del repositorio" 
-      labelPlacement="floating" 
-      fill="outline" 
-      placeholder="Este es un repositorio de android" 
-      className='form-field'
-      rows={6}
-      value={repoFormData.description}
-      onIonChange={(e) => setRepoDescription(e.detail.value!)}
-      ></IonTextarea>
+      <IonContent fullscreen className="ion-padding">
+        <form onSubmit={handleCreate}>
+          <IonItem>
+            <IonLabel position="stacked">Nombre</IonLabel>
+            <IonInput value={name} onIonInput={e => setName(e.detail.value!)} required />
+          </IonItem>
 
-      <IonButton expand='block' className='form-field' onClick={saveRepository}>
-      Guardar
-      </IonButton>
-    </div>
+          <IonItem>
+            <IonLabel position="stacked">Descripción</IonLabel>
+            <IonTextarea value={description} onIonInput={e => setDescription(e.detail.value!)} />
+          </IonItem>
+
+          <IonItem>
+            <IonLabel>Privado</IonLabel>
+            <IonToggle checked={isPrivate} onIonChange={e => setIsPrivate(e.detail.checked)} slot="end" />
+          </IonItem>
+
+          {error && <IonText color="danger">{error}</IonText>}
+
+          <IonButton expand="block" type="submit" disabled={loading} className="ion-margin-top">
+            {loading ? 'Creando...' : 'Crear Repositorio'}
+          </IonButton>
+        </form>
+        <IonLoading isOpen={loading} message="Creando repositorio..." />
       </IonContent>
     </IonPage>
   );

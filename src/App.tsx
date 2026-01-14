@@ -45,12 +45,19 @@ import '@ionic/react/css/palettes/dark.system.css';
 /* Theme variables */
 import './theme/variables.css';
 import AuthService from './services/AuthService';
+import { useEffect, useState } from 'react';
 import Login from './pages/Login';
 
 setupIonicReact();
 
 const App: React.FC = () => {
-  const isAuthenticated = AuthService.isAuthenticated();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(AuthService.isAuthenticated());
+
+  useEffect(() => {
+    const onAuthChange = () => setIsAuthenticated(AuthService.isAuthenticated());
+    window.addEventListener('authChanged', onAuthChange);
+    return () => window.removeEventListener('authChanged', onAuthChange);
+  }, []);
 
   return (
     <IonApp>

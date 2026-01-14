@@ -1,23 +1,54 @@
+import {
+  IonItem,
+  IonLabel,
+  IonThumbnail,
+  IonItemSliding,
+  IonItemOptions,
+  IonItemOption,
+  IonIcon,
+} from '@ionic/react';
+import { pencilOutline, trashOutline } from 'ionicons/icons';
 import { RepositoryItem } from '../interfaces/RepositoryItem';
 import './RepoItem.css';
-import { IonItem, IonLabel, IonThumbnail } from '@ionic/react';
 
+interface Props {
+  repo: RepositoryItem;
+  onDelete?: () => void;
+  onEdit?: () => void;
+  onView?: () => void;
+}
 
-const RepoItem: React.FC<{repo: RepositoryItem}> = ({ repo }) => {
+const RepoItem: React.FC<Props> = ({ repo, onDelete, onEdit, onView }) => {
   return (
-    <IonItem>
+    <IonItemSliding>
+      <IonItem button onClick={onView}>
+        <IonThumbnail slot="start">
+          <img
+            src={
+              repo.imageUrl ??
+              'https://static.vecteezy.com/system/resources/previews/005/544/718/original/icon-image-not-found-free-vector.jpg'
+            }
+            alt={repo.name}
+          />
+        </IonThumbnail>
 
-      <IonThumbnail slot="start">
-        <img src={repo.imageUrl ?? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6SMNlahdjSe9FEIyoP1m83ssBFukv5pVvZw&s"} 
-        />
-      </IonThumbnail>
-      <IonLabel>
-        <h2>{repo.name}</h2>
-        <p>{repo.description}</p>
-        <p>Propietario: {repo.owner}</p>
-        <p>Lenguaje: {repo.language}</p>
+        <IonLabel>
+          <h2>{repo.name}</h2>
+          <p>{repo.description}</p>
+          <p>Propietario: {repo.owner}</p>
+          <p>Lenguaje: {repo.language}</p>
         </IonLabel>
-    </IonItem>
+      </IonItem>
+
+      <IonItemOptions side="end">
+        <IonItemOption color="warning" onClick={onEdit}>
+          <IonIcon icon={pencilOutline} />
+        </IonItemOption>
+        <IonItemOption color="danger" onClick={onDelete}>
+          <IonIcon icon={trashOutline} />
+        </IonItemOption>
+      </IonItemOptions>
+    </IonItemSliding>
   );
 };
 
